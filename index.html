@@ -2,600 +2,1261 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PORTFOLIO</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio</title>
   <link rel="icon" href="a.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #060608;
+      --deep: #0d0d12;
+      --surface: #12121a;
+      --muted: #1e1e2a;
+      --border: #2a2a3a;
+      --text: #c8c8d8;
+      --dim: #6a6a88;
+      --white: #eeeef5;
+      --gold: #c9a96e;
+      --gold-dim: #8a6f42;
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      margin: 0;
-      background-color: #000; /* Dark background to show white glow */
+      background: var(--black);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(201,169,110,0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: width 0.25s, height 0.25s, opacity 0.25s;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring.expanded { width: 60px; height: 60px; opacity: 0.6; }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.35;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(6,6,8,0.95) 0%, transparent 100%);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: var(--white);
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 2.5rem; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dim);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
       height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
+    }
+
+    .hero-img {
+      position: absolute;
+      inset: -15%;
+      background: url("splunk.png") center/cover no-repeat;
+      will-change: transform;
+      filter: brightness(0.18) saturate(0.6);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 60% 40%, rgba(201,169,110,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 80% at 50% 100%, rgba(6,6,8,0.95) 0%, transparent 70%),
+        linear-gradient(to bottom, rgba(6,6,8,0.35) 0%, rgba(6,6,8,0.1) 40%, rgba(6,6,8,0.75) 100%);
+      z-index: 1;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: -20%;
+      background-image:
+        linear-gradient(rgba(201,169,110,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      will-change: transform;
+      z-index: 2;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.3s forwards;
+    }
+    .hero-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4rem, 10vw, 9rem);
+      font-weight: 300;
+      line-height: 0.9;
+      color: var(--white);
+      letter-spacing: -0.01em;
+      opacity: 0;
+      animation: fadeUp 1.2s 0.5s forwards;
+    }
+    .hero-name em {
+      font-style: italic;
+      color: var(--gold);
+      display: block;
+    }
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--dim);
+      opacity: 0;
+      animation: fadeUp 1s 0.9s forwards;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      opacity: 0;
+      animation: fadeUp 1s 1.4s forwards;
+      z-index: 3;
+    }
+    .hero-scroll span {
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .scroll-line {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: lineAnim 2s 1.8s infinite;
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      position: relative;
+      padding: 12rem 4rem 10rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7rem;
+      align-items: start;
+    }
+    .about-label {
+      position: absolute;
+      top: 5rem; left: 4rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    .about-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 4.5vw, 4rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.1;
+      margin-top: 4rem;
+    }
+    .about-heading em { font-style: italic; color: var(--gold); }
+
+    .about-portrait { position: relative; margin-top: 3rem; }
+    .portrait-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+    }
+    .portrait-frame img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(40%) brightness(0.8) contrast(1.15);
+      transition: filter 0.7s, transform 0.9s;
+      display: block;
+    }
+    .portrait-frame:hover img {
+      filter: grayscale(10%) brightness(0.88) contrast(1.05);
+      transform: scale(1.03);
+    }
+    .portrait-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(6,6,8,0.75) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .portrait-accent {
+      position: absolute;
+      top: 1.5rem; right: -1.5rem;
+      width: 100%; height: 100%;
+      border: 1px solid rgba(201,169,110,0.18);
+      pointer-events: none;
+      z-index: -1;
+    }
+    .portrait-caption {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(201,169,110,0.65);
+      z-index: 2;
+    }
+
+    .about-right { padding-top: 4rem; }
+    .about-text {
+      font-size: 0.75rem;
+      line-height: 2.1;
+      color: var(--dim);
+    }
+    .about-text p + p { margin-top: 1.5rem; }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      color: var(--white);
+      display: block;
+    }
+    .stat-value span { color: var(--gold); }
+    .stat-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: 0.3rem;
+      display: block;
+    }
+
+    /* ── WORK ── */
+    #work {
+      padding: 6rem 4rem 10rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      font-weight: 300;
+      color: var(--white);
+    }
+    .section-count {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      color: var(--dim);
+      font-style: italic;
+    }
+
+    /* Project image cards */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px;
+    }
+    .project-card {
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+      aspect-ratio: 4/3;
+    }
+    .project-card.wide {
+      grid-column: span 2;
+      aspect-ratio: 16/7;
+    }
+    .project-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.38) saturate(0.45) contrast(1.1);
+      transition: filter 0.7s ease, transform 0.9s ease;
+      display: block;
+    }
+    .project-card:hover img {
+      filter: brightness(0.55) saturate(0.75);
+      transform: scale(1.06);
+    }
+    .project-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(6,6,8,0.95) 0%, rgba(6,6,8,0.15) 65%, transparent 100%);
+      transition: background 0.5s;
+    }
+    .project-card:hover .project-card-overlay {
+      background: linear-gradient(to top, rgba(6,6,8,0.88) 0%, rgba(6,6,8,0.2) 70%, rgba(201,169,110,0.04) 100%);
+    }
+    .project-card-content {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 2.5rem;
+      z-index: 2;
+      transform: translateY(6px);
+      transition: transform 0.4s ease;
+    }
+    .project-card:hover .project-card-content { transform: translateY(0); }
+    .project-card-num {
+      font-size: 0.52rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .project-card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .project-card-tags {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s 0.08s, transform 0.4s 0.08s;
+    }
+    .project-card:hover .project-card-tags { opacity: 1; transform: translateY(0); }
+    .tag {
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 2px;
+      background: rgba(6,6,8,0.6);
+    }
+    .project-card-arrow {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      font-size: 1.1rem;
+      color: var(--gold);
+      opacity: 0;
+      transition: opacity 0.4s, transform 0.4s;
+      z-index: 2;
+    }
+    .project-card:hover .project-card-arrow { opacity: 1; transform: translate(3px, -3px); }
+
+    /* ── 3D TERMINAL ── */
+    #terminal-section {
+      background: var(--black);
+      padding: 6rem 4rem 8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 60vh;
+    }
+    #terminal-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(201,169,110,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .terminal-hint {
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 3rem;
+      opacity: 0.8;
+    }
+
+    /* 3D scene wrapper — drag to rotate */
+    .terminal-scene {
+      perspective: 1000px;
+      width: 680px;
+      max-width: 95vw;
+      cursor: grab;
+      user-select: none;
+    }
+    .terminal-scene:active { cursor: grabbing; }
+
+    .terminal-box {
+      width: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(8deg) rotateY(-14deg);
+      transition: transform 0.08s linear;
+      border-radius: 12px;
+      box-shadow:
+        0 60px 120px rgba(0,0,0,0.8),
+        0 20px 40px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(201,169,110,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      background: #111118;
+      overflow: hidden;
+    }
+
+    /* Title bar */
+    .terminal-titlebar {
+      background: #1a1a24;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .t-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .t-dot.red    { background: #ff5f57; }
+    .t-dot.yellow { background: #ffbd2e; }
+    .t-dot.green  { background: #28c840; }
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.6rem;
+      color: rgba(200,200,216,0.35);
+      letter-spacing: 0.1em;
+      margin-right: 36px;
+    }
+
+    /* Terminal body */
+    .terminal-body {
+      padding: 1.5rem 1.8rem 1.5rem;
+      min-height: 260px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.75;
+      color: #c8c8d8;
+      background: #0c0c12;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Scanline effect */
+    .terminal-body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .t-line { position: relative; z-index: 2; }
+    .t-prompt { color: var(--gold); }
+    .t-path   { color: #7ec8e3; }
+    .t-branch { color: #b48ead; }
+    .t-cmd    { color: #c8c8d8; }
+    .t-out-green  { color: #a3e4a3; }
+    .t-out-dim    { color: #5a5a78; }
+    .t-out-gold   { color: var(--gold); }
+    .t-out-link   { color: #7ec8e3; text-decoration: underline; }
+    .t-error      { color: #ff6b6b; }
+
+    /* Input row */
+    .t-input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      position: relative;
+      z-index: 2;
+    }
+    .t-real-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #c8c8d8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      flex: 1;
+      caret-color: var(--gold);
+      cursor: text;
+    }
+
+    /* Blinking cursor */
+    .t-caret {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: var(--gold);
+      vertical-align: text-bottom;
+      animation: blink 1.1s step-end infinite;
+      margin-left: 1px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* Glow reflection on bottom face of 3D box */
+    .terminal-box::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 5%; right: 5%;
+      height: 30px;
+      background: rgba(201,169,110,0.06);
+      filter: blur(12px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .terminal-footer-hint {
+      margin-top: 1.8rem;
+      font-size: 0.55rem;
+      color: var(--dim);
+      letter-spacing: 0.2em;
+      text-align: center;
+      opacity: 0.6;
+    }
+    .terminal-footer-hint span { color: var(--gold); }
+
+    /* ── SKILLS ── */
+    #skills {
+      background: var(--deep);
+      padding: 10rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .skills-bg-img {
+      position: absolute;
+      inset: -10%;
+      opacity: 0.04;
+      filter: saturate(0);
+      will-change: transform;
+    }
+    .skills-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+      margin-top: 5rem;
+    }
+    .skill-group-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .skill-list { list-style: none; }
+    .skill-list li {
+      font-size: 0.65rem;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(42,42,58,0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      transition: color 0.3s, padding-left 0.3s;
+    }
+    .skill-list li:hover { color: var(--text); padding-left: 0.5rem; }
+    .skill-list li::before { content: '—'; color: var(--gold-dim); font-size: 0.5rem; flex-shrink: 0; }
+
+    /* ── CONTACT ── */
+    #contact {
+      padding: 12rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
       position: relative;
     }
-
-    .vertical-line {
+    .contact-bg-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(6rem, 15vw, 14rem);
+      font-weight: 300;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(201,169,110,0.07);
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 2px;
-      height: 60%; /* Adjustable height */
-      background-color: white;
-      box-shadow: 0 0 10px white, 0 0 20px white;
-      z-index: 10;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform;
+    }
+    .contact-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .contact-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .contact-heading em { font-style: italic; color: var(--gold); }
+    .contact-sub {
+      font-size: 0.7rem;
+      color: var(--dim);
+      margin-bottom: 4rem;
+      line-height: 2;
+      position: relative;
+    }
+    .contact-email {
+      display: inline-block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: var(--white);
+      text-decoration: none;
+      border-bottom: 1px solid var(--gold-dim);
+      padding-bottom: 0.3rem;
+      transition: color 0.3s, border-color 0.3s;
+      position: relative;
+    }
+    .contact-email:hover { color: var(--gold); border-color: var(--gold); }
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+    .social-links a {
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .social-links a:hover { color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+    }
+    .footer-copy { font-size: 0.55rem; letter-spacing: 0.2em; color: var(--border); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes lineAnim {
+      0%   { opacity: 0; height: 0; }
+      30%  { opacity: 1; }
+      100% { opacity: 0; height: 60px; }
     }
 
-    .line-left {
-      right: 18%; /* Adjust position from left side */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
     }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    .line-right {
-      right: 20%; /* Adjust position from right side */
-    }
+    @media (max-width: 900px) {
+      nav { padding: 1.5rem 2rem; }
+      .nav-links { gap: 1.5rem; }
+      #about { grid-template-columns: 1fr; gap: 3rem; padding: 8rem 2rem 6rem; }
+      .about-right { padding-top: 0; }
+      .portrait-accent { display: none; }
+      #work { padding: 5rem 2rem 8rem; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .project-card.wide { grid-column: span 1; aspect-ratio: 4/3; }
+      .skills-grid { grid-template-columns: 1fr; }
+      #skills { padding: 7rem 2rem; }
 
-    .about {
-      position: absolute;
-      top: 10%;
-      right: 60%;
-      transform: translateX(50%);
-      color: white;
-      font-size: 24px;
-      z-index: 10;
-    }
-
-    .about-body {
-      position: absolute;
-      top: 20%;
-      right: 60%;
-      transform: translateX(50%);
-      color: white;
-      font-size: 16px;
-      width: 900px;
-      z-index: 10;
+      #contact { padding: 8rem 2rem; }
+      footer { padding: 2rem; flex-direction: column; gap: 1rem; text-align: center; }
     }
   </style>
 </head>
-<body bgcolor="black">
-  <a href="https://github.com/Gogeta654" style="font-family: Tesla;" class="btn-shine">Aniruddh Uniyal</a>
-  <div class="card">
-    <div class="loader">
-      <p>Website</p>
-      <div class="words">
-        <span class="word">That's Interactive</span>
-        <span class="word">To Grow</span>
-        <span class="word">To Learn</span>
-        <span class="word">That's a Portfolio</span>
-        <span class="word">That's Interactive</span>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">A<span>.</span>U</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- HERO — code background with parallax -->
+  <section id="hero">
+    <div class="hero-img" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="grid-lines" id="gridLines"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Cybersecurity &nbsp;·&nbsp; AI & Data Science &nbsp;·&nbsp; Networking</p>
+      <h1 class="hero-name">
+        Aniruddh
+        <em>Uniyal</em>
+      </h1>
+      <p class="hero-sub">Building things that matter</p>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-label">/ 01 &nbsp; About</div>
+
+    <div>
+      <div class="about-heading reveal">
+        Crafting <em>elegant</em><br>solutions to<br>complex problems.
+      </div>
+      <div class="about-portrait reveal" style="transition-delay:0.15s">
+        <div class="portrait-frame">
+          <!-- Placeholder portrait — swap for your own photo -->
+          <img
+            src="Face.jpeg"
+            alt="Aniruddh Uniyal"
+            loading="lazy"
+          />
+          <div class="portrait-caption">Aniruddh Uniyal — Engineer</div>
+        </div>
+        <div class="portrait-accent"></div>
       </div>
     </div>
-  </div>
 
-  <div class="card2">
-    <ul class="list">
-      <!-- GitHub with GitHub SVG icon -->
-      <li class="element">
-        <svg
-          role="img"
-          height="20"
-          width="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          stroke="#7e8590"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <title>GitHub</title>
-          <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.865 8.167 6.839 9.489.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.34-3.369-1.34-.455-1.156-1.11-1.464-1.11-1.464-.909-.621.069-.609.069-.609 1.004.07 1.532 1.032 1.532 1.032.893 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.944 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.646 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.845c.85.004 1.705.115 2.504.337 1.908-1.296 2.747-1.026 2.747-1.026.546 1.376.202 2.393.1 2.646.64.699 1.028 1.592 1.028 2.683 0 3.842-2.337 4.688-4.565 4.937.36.31.68.92.68 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.015 10.015 0 0022 12c0-5.52-4.48-10-10-10z" />
-        </svg>
-        <a href="https://github.com/Gogeta654" target="_blank" class="label">GitHub</a>
-      </li>
-
-      <!-- LeetCode with LeetCode SVG icon -->
-      <li class="element">
-        <svg
-          role="img"
-          height="20"
-          width="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          stroke="#7e8590"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <title>LeetCode</title>
-          <path d="M9 3l7 7-7 7" />
-          <path d="M16 3v14" />
-        </svg>
-        <a href="https://leetcode.com/u/AniruddhUniyal/" target="_blank" class="label">LeetCode</a>
-      </li>
-
-      <!-- Team Access -->
-      <li class="element">
-        <svg
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          stroke-width="2"
-          stroke="#7e8590"
-          fill="none"
-          viewBox="0 0 24 24"
-          height="20"
-          width="20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M18 21a8 8 0 0 0-16 0"></path>
-          <circle r="5" cy="8" cx="10"></circle>
-          <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"></path>
-        </svg>
-        <a href="https://github.com/Gogeta654/Programming" class="label">Programming Courses</a>
-      </li>
-    </ul>
-  </div>
-  <img src="ayanokoji.jpeg" alt="Description" style="float: right;" class="right-image">
-
-<svg
-  id="svg-global"
-  xmlns="http://www.w3.org/2000/svg"
-  fill="none"
-  viewBox="0 0 94 136"
-  height="136"
-  width="94"
->
-  <path
-    stroke="#4B22B5"
-    d="M87.3629 108.433L49.1073 85.3765C47.846 84.6163 45.8009 84.6163 44.5395 85.3765L6.28392 108.433C5.02255 109.194 5.02255 110.426 6.28392 111.187L44.5395 134.243C45.8009 135.004 47.846 135.004 49.1073 134.243L87.3629 111.187C88.6243 110.426 88.6243 109.194 87.3629 108.433Z"
-    id="line-v1"
-  ></path>
-  <path
-    stroke="#5728CC"
-    d="M91.0928 95.699L49.2899 70.5042C47.9116 69.6734 45.6769 69.6734 44.2986 70.5042L2.49568 95.699C1.11735 96.5298 1.11735 97.8767 2.49568 98.7074L44.2986 123.902C45.6769 124.733 47.9116 124.733 49.2899 123.902L91.0928 98.7074C92.4712 97.8767 92.4712 96.5298 91.0928 95.699Z"
-    id="line-v2"
-  ></path>
-  <g id="node-server">
-    <path
-      fill="url(#paint0_linear_204_217)"
-      d="M2.48637 72.0059L43.8699 96.9428C45.742 98.0709 48.281 97.8084 50.9284 96.2133L91.4607 71.7833C92.1444 71.2621 92.4197 70.9139 92.5421 70.1257V86.1368C92.5421 86.9686 92.0025 87.9681 91.3123 88.3825C84.502 92.4724 51.6503 112.204 50.0363 113.215C48.2352 114.343 45.3534 114.343 43.5523 113.215C41.9261 112.197 8.55699 91.8662 2.08967 87.926C1.39197 87.5011 1.00946 86.5986 1.00946 85.4058V70.1257C1.11219 70.9289 1.49685 71.3298 2.48637 72.0059Z"
-    ></path>
-    <path
-      stroke="url(#paint2_linear_204_217)"
-      fill="url(#paint1_linear_204_217)"
-      d="M91.0928 68.7324L49.2899 43.5375C47.9116 42.7068 45.6769 42.7068 44.2986 43.5375L2.49568 68.7324C1.11735 69.5631 1.11735 70.91 2.49568 71.7407L44.2986 96.9356C45.6769 97.7663 47.9116 97.7663 49.2899 96.9356L91.0928 71.7407C92.4712 70.91 92.4712 69.5631 91.0928 68.7324Z"
-    ></path>
-    <mask
-      height="41"
-      width="67"
-      y="50"
-      x="13"
-      maskUnits="userSpaceOnUse"
-      style="mask-type:luminance"
-      id="mask0_204_217"
-    >
-      <path
-        fill="white"
-        d="M78.3486 68.7324L49.0242 51.0584C47.6459 50.2276 45.4111 50.2276 44.0328 51.0584L14.7084 68.7324C13.3301 69.5631 13.3301 70.91 14.7084 71.7407L44.0328 89.4148C45.4111 90.2455 47.6459 90.2455 49.0242 89.4148L78.3486 71.7407C79.7269 70.91 79.727 69.5631 78.3486 68.7324Z"
-      ></path>
-    </mask>
-    <g mask="url(#mask0_204_217)">
-      <path
-        fill="#332C94"
-        d="M78.3486 68.7324L49.0242 51.0584C47.6459 50.2276 45.4111 50.2276 44.0328 51.0584L14.7084 68.7324C13.3301 69.5631 13.3301 70.91 14.7084 71.7407L44.0328 89.4148C45.4111 90.2455 47.6459 90.2455 49.0242 89.4148L78.3486 71.7407C79.7269 70.91 79.727 69.5631 78.3486 68.7324Z"
-      ></path>
-      <mask
-        height="29"
-        width="48"
-        y="56"
-        x="23"
-        maskUnits="userSpaceOnUse"
-        style="mask-type:luminance"
-        id="mask1_204_217"
-      >
-        <path
-          fill="white"
-          d="M68.9898 68.7324L49.0242 56.699C47.6459 55.8683 45.4111 55.8683 44.0328 56.699L24.0673 68.7324C22.6889 69.5631 22.6889 70.91 24.0673 71.7407L44.0328 83.7741C45.4111 84.6048 47.6459 84.6048 49.0242 83.7741L68.9898 71.7407C70.3681 70.91 70.3681 69.5631 68.9898 68.7324Z"
-        ></path>
-      </mask>
-      <g mask="url(#mask1_204_217)">
-        <path
-          fill="#5E5E5E"
-          d="M68.9898 68.7324L49.0242 56.699C47.6459 55.8683 45.4111 55.8683 44.0328 56.699L24.0673 68.7324C22.6889 69.5631 22.6889 70.91 24.0673 71.7407L44.0328 83.7741C45.4111 84.6048 47.6459 84.6048 49.0242 83.7741L68.9898 71.7407C70.3681 70.91 70.3681 69.5631 68.9898 68.7324Z"
-        ></path>
-        <path
-          fill="#71B1C6"
-          d="M70.1311 69.3884L48.42 56.303C47.3863 55.6799 45.7103 55.6799 44.6765 56.303L22.5275 69.6523C21.4938 70.2754 21.4938 71.2855 22.5275 71.9086L44.2386 84.994C45.2723 85.617 46.9484 85.617 47.9821 84.994L70.1311 71.6446C71.1648 71.0216 71.1648 70.0114 70.1311 69.3884Z"
-        ></path>
-        <path
-          fill="#80C0D4"
-          d="M70.131 70.8923L48.4199 57.8069C47.3862 57.1839 45.7101 57.1839 44.6764 57.8069L22.5274 71.1562C21.4937 71.7793 21.4937 72.7894 22.5274 73.4125L44.2385 86.4979C45.2722 87.1209 46.9482 87.1209 47.982 86.4979L70.131 73.1486C71.1647 72.5255 71.1647 71.5153 70.131 70.8923Z"
-        ></path>
-        <path
-          fill="#89D3EB"
-          d="M69.751 72.1675L48.4199 59.3111C47.3862 58.6881 45.7101 58.6881 44.6764 59.3111L23.2004 72.2548C22.1667 72.8779 22.1667 73.888 23.2004 74.5111L44.5315 87.3674C45.5653 87.9905 47.2413 87.9905 48.2751 87.3674L69.751 74.4238C70.7847 73.8007 70.7847 72.7905 69.751 72.1675Z"
-        ></path>
-        <path
-          fill="#97E6FF"
-          d="M68.5091 72.9231L48.4199 60.8153C47.3862 60.1922 45.7101 60.1922 44.6764 60.8153L24.8146 72.7861C23.7808 73.4091 23.7808 74.4193 24.8146 75.0424L44.9038 87.1502C45.9375 87.7733 47.6135 87.7733 48.6473 87.1502L68.5091 75.1794C69.5428 74.5563 69.5428 73.5462 68.5091 72.9231Z"
-        ></path>
-        <path
-          fill="#97E6FF"
-          d="M66.6747 73.3219L48.4199 62.3197C47.3862 61.6966 45.7101 61.6966 44.6764 62.3197L26.4412 73.3101C25.4075 73.9332 25.4075 74.9433 26.4412 75.5664L44.696 86.5686C45.7297 87.1917 47.4058 87.1917 48.4395 86.5686L66.6747 75.5782C67.7084 74.9551 67.7084 73.945 66.6747 73.3219Z"
-        ></path>
-      </g>
-      <path
-        stroke-width="0.5"
-        stroke="#F4F4F4"
-        d="M68.9898 68.7324L49.0242 56.699C47.6459 55.8683 45.4111 55.8683 44.0328 56.699L24.0673 68.7324C22.6889 69.5631 22.6889 70.91 24.0673 71.7407L44.0328 83.7741C45.4111 84.6048 47.6459 84.6048 49.0242 83.7741L68.9898 71.7407C70.3681 70.91 70.3681 69.5631 68.9898 68.7324Z"
-      ></path>
-    </g>
-  </g>
-  <g id="particles">
-    <path
-      fill="url(#paint3_linear_204_217)"
-      d="M43.5482 32.558C44.5429 32.558 45.3493 31.7162 45.3493 30.6778C45.3493 29.6394 44.5429 28.7976 43.5482 28.7976C42.5535 28.7976 41.7471 29.6394 41.7471 30.6778C41.7471 31.7162 42.5535 32.558 43.5482 32.558Z"
-      class="particle p1"
-    ></path>
-    <path
-      fill="url(#paint4_linear_204_217)"
-      d="M50.0323 48.3519C51.027 48.3519 51.8334 47.5101 51.8334 46.4717C51.8334 45.4333 51.027 44.5915 50.0323 44.5915C49.0375 44.5915 48.2311 45.4333 48.2311 46.4717C48.2311 47.5101 49.0375 48.3519 50.0323 48.3519Z"
-      class="particle p2"
-    ></path>
-    <path
-      fill="url(#paint5_linear_204_217)"
-      d="M40.3062 62.6416C41.102 62.6416 41.7471 61.9681 41.7471 61.1374C41.7471 60.3067 41.102 59.6332 40.3062 59.6332C39.5104 59.6332 38.8653 60.3067 38.8653 61.1374C38.8653 61.9681 39.5104 62.6416 40.3062 62.6416Z"
-      class="particle p3"
-    ></path>
-    <path
-      fill="url(#paint6_linear_204_217)"
-      d="M50.7527 73.9229C52.1453 73.9229 53.2743 72.7444 53.2743 71.2906C53.2743 69.8368 52.1453 68.6583 50.7527 68.6583C49.3601 68.6583 48.2311 69.8368 48.2311 71.2906C48.2311 72.7444 49.3601 73.9229 50.7527 73.9229Z"
-      class="particle p4"
-    ></path>
-    <path
-      fill="url(#paint7_linear_204_217)"
-      d="M48.5913 76.9312C49.1882 76.9312 49.672 76.4262 49.672 75.8031C49.672 75.1801 49.1882 74.675 48.5913 74.675C47.9945 74.675 47.5107 75.1801 47.5107 75.8031C47.5107 76.4262 47.9945 76.9312 48.5913 76.9312Z"
-      class="particle p5"
-    ></path>
-    <path
-      fill="url(#paint8_linear_204_217)"
-      d="M52.9153 67.1541C53.115 67.1541 53.2768 66.9858 53.2768 66.7781C53.2768 66.5704 53.115 66.402 52.9153 66.402C52.7156 66.402 52.5538 66.5704 52.5538 66.7781C52.5538 66.9858 52.7156 67.1541 52.9153 67.1541Z"
-      class="particle p6"
-    ></path>
-    <path
-      fill="url(#paint9_linear_204_217)"
-      d="M52.1936 43.8394C52.7904 43.8394 53.2743 43.3344 53.2743 42.7113C53.2743 42.0883 52.7904 41.5832 52.1936 41.5832C51.5967 41.5832 51.1129 42.0883 51.1129 42.7113C51.1129 43.3344 51.5967 43.8394 52.1936 43.8394Z"
-      class="particle p7"
-    ></path>
-    <path
-      fill="url(#paint10_linear_204_217)"
-      d="M57.2367 29.5497C57.8335 29.5497 58.3173 29.0446 58.3173 28.4216C58.3173 27.7985 57.8335 27.2935 57.2367 27.2935C56.6398 27.2935 56.156 27.7985 56.156 28.4216C56.156 29.0446 56.6398 29.5497 57.2367 29.5497Z"
-      class="particle p8"
-    ></path>
-    <path
-      fill="url(#paint11_linear_204_217)"
-      d="M43.9084 34.8144C44.3063 34.8144 44.6289 34.4777 44.6289 34.0623C44.6289 33.647 44.3063 33.3102 43.9084 33.3102C43.5105 33.3102 43.188 33.647 43.188 34.0623C43.188 34.4777 43.5105 34.8144 43.9084 34.8144Z"
-      class="particle p9"
-    ></path>
-  </g>
-  <g id="reflectores">
-    <path
-      fill-opacity="0.2"
-      fill="url(#paint12_linear_204_217)"
-      d="M49.2037 57.0009L68.7638 68.7786C69.6763 69.3089 69.7967 69.9684 69.794 70.1625V13.7383C69.7649 13.5587 69.6807 13.4657 69.4338 13.3096L48.4832 0.601307C46.9202 -0.192595 46.0788 -0.208238 44.6446 0.601307L23.6855 13.2118C23.1956 13.5876 23.1966 13.7637 23.1956 14.4904L23.246 70.1625C23.2948 69.4916 23.7327 69.0697 25.1768 68.2447L43.9084 57.0008C44.8268 56.4344 45.3776 56.2639 46.43 56.2487C47.5299 56.2257 48.1356 56.4222 49.2037 57.0009Z"
-    ></path>
-    <path
-      fill-opacity="0.2"
-      fill="url(#paint13_linear_204_217)"
-      d="M48.8867 27.6696C49.9674 26.9175 68.6774 14.9197 68.6774 14.9197C69.3063 14.5327 69.7089 14.375 69.7796 13.756V70.1979C69.7775 70.8816 69.505 71.208 68.7422 71.7322L48.9299 83.6603C48.2003 84.1258 47.6732 84.2687 46.5103 84.2995C45.3295 84.2679 44.8074 84.1213 44.0907 83.6603L24.4348 71.8149C23.5828 71.3313 23.2369 71.0094 23.2316 70.1979L23.1884 13.9816C23.1798 14.8398 23.4982 15.3037 24.7518 16.0874C24.7518 16.0874 42.7629 26.9175 44.2038 27.6696C45.6447 28.4217 46.0049 28.4217 46.5452 28.4217C47.0856 28.4217 47.806 28.4217 48.8867 27.6696Z"
-    ></path>
-  </g>
-  <g id="panel-rigth">
-    <mask fill="white" id="path-26-inside-1_204_217">
-      <path
-        d="M72 91.8323C72 90.5121 72.9268 88.9068 74.0702 88.2467L87.9298 80.2448C89.0731 79.5847 90 80.1198 90 81.44V81.44C90 82.7602 89.0732 84.3656 87.9298 85.0257L74.0702 93.0275C72.9268 93.6876 72 93.1525 72 91.8323V91.8323Z"
-      ></path>
-    </mask>
-    <path
-      fill="#91DDFB"
-      d="M72 91.8323C72 90.5121 72.9268 88.9068 74.0702 88.2467L87.9298 80.2448C89.0731 79.5847 90 80.1198 90 81.44V81.44C90 82.7602 89.0732 84.3656 87.9298 85.0257L74.0702 93.0275C72.9268 93.6876 72 93.1525 72 91.8323V91.8323Z"
-    ></path>
-    <path
-      mask="url(#path-26-inside-1_204_217)"
-      fill="#489CB7"
-      d="M72 89.4419L90 79.0496L72 89.4419ZM90.6928 81.44C90.6928 82.9811 89.6109 84.8551 88.2762 85.6257L74.763 93.4275C73.237 94.3085 72 93.5943 72 91.8323V91.8323C72 92.7107 72.9268 92.8876 74.0702 92.2275L87.9298 84.2257C88.6905 83.7865 89.3072 82.7184 89.3072 81.84L90.6928 81.44ZM72 94.2227V89.4419V94.2227ZM88.2762 80.0448C89.6109 79.2742 90.6928 79.8989 90.6928 81.44V81.44C90.6928 82.9811 89.6109 84.8551 88.2762 85.6257L87.9298 84.2257C88.6905 83.7865 89.3072 82.7184 89.3072 81.84V81.84C89.3072 80.5198 88.6905 79.8056 87.9298 80.2448L88.2762 80.0448Z"
-    ></path>
-    <mask fill="white" id="path-28-inside-2_204_217">
-      <path
-        d="M67 94.6603C67 93.3848 67.8954 91.8339 69 91.1962V91.1962C70.1046 90.5584 71 91.0754 71 92.3509V92.5129C71 93.7884 70.1046 95.3393 69 95.977V95.977C67.8954 96.6147 67 96.0978 67 94.8223V94.6603Z"
-      ></path>
-    </mask>
-    <path
-      fill="#91DDFB"
-      d="M67 94.6603C67 93.3848 67.8954 91.8339 69 91.1962V91.1962C70.1046 90.5584 71 91.0754 71 92.3509V92.5129C71 93.7884 70.1046 95.3393 69 95.977V95.977C67.8954 96.6147 67 96.0978 67 94.8223V94.6603Z"
-    ></path>
-    <path
-      mask="url(#path-28-inside-2_204_217)"
-      fill="#489CB7"
-      d="M67 92.3509L71 90.0415L67 92.3509ZM71.6928 92.5129C71.6928 94.0093 70.6423 95.8288 69.3464 96.577L69.3464 96.577C68.0505 97.3252 67 96.7187 67 95.2223V94.8223C67 95.6559 67.8954 95.8147 69 95.177L69 95.177C69.7219 94.7602 70.3072 93.7465 70.3072 92.9129L71.6928 92.5129ZM67 97.1317V92.3509V97.1317ZM69.2762 91.0367C70.6109 90.2661 71.6928 90.8908 71.6928 92.4319V92.5129C71.6928 94.0093 70.6423 95.8288 69.3464 96.577L69 95.177C69.7219 94.7602 70.3072 93.7465 70.3072 92.9129V92.7509C70.3072 91.4754 69.7219 90.7794 69 91.1962L69.2762 91.0367Z"
-    ></path>
-  </g>
-  <defs>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="92.0933"
-      x2="92.5421"
-      y1="92.0933"
-      x1="1.00946"
-      id="paint0_linear_204_217"
-    >
-      <stop stop-color="#5727CC"></stop>
-      <stop stop-color="#4354BF" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="91.1638"
-      x2="6.72169"
-      y1="70"
-      x1="92.5"
-      id="paint1_linear_204_217"
-    >
-      <stop stop-color="#4559C4"></stop>
-      <stop stop-color="#332C94" offset="0.29"></stop>
-      <stop stop-color="#5727CB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="85.0762"
-      x2="3.55544"
-      y1="70"
-      x1="92.5"
-      id="paint2_linear_204_217"
-    >
-      <stop stop-color="#91DDFB"></stop>
-      <stop stop-color="#8841D5" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="32.558"
-      x2="43.5482"
-      y1="28.7976"
-      x1="43.5482"
-      id="paint3_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="48.3519"
-      x2="50.0323"
-      y1="44.5915"
-      x1="50.0323"
-      id="paint4_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="62.6416"
-      x2="40.3062"
-      y1="59.6332"
-      x1="40.3062"
-      id="paint5_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="73.9229"
-      x2="50.7527"
-      y1="68.6583"
-      x1="50.7527"
-      id="paint6_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="76.9312"
-      x2="48.5913"
-      y1="74.675"
-      x1="48.5913"
-      id="paint7_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="67.1541"
-      x2="52.9153"
-      y1="66.402"
-      x1="52.9153"
-      id="paint8_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="43.8394"
-      x2="52.1936"
-      y1="41.5832"
-      x1="52.1936"
-      id="paint9_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="29.5497"
-      x2="57.2367"
-      y1="27.2935"
-      x1="57.2367"
-      id="paint10_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="34.8144"
-      x2="43.9084"
-      y1="33.3102"
-      x1="43.9084"
-      id="paint11_linear_204_217"
-    >
-      <stop stop-color="#5927CE"></stop>
-      <stop stop-color="#91DDFB" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="16.0743"
-      x2="62.9858"
-      y1="88.5145"
-      x1="67.8638"
-      id="paint12_linear_204_217"
-    >
-      <stop stop-color="#97E6FF"></stop>
-      <stop stop-opacity="0" stop-color="white" offset="1"></stop>
-    </linearGradient>
-    <linearGradient
-      gradientUnits="userSpaceOnUse"
-      y2="39.4139"
-      x2="31.4515"
-      y1="88.0938"
-      x1="36.2597"
-      id="paint13_linear_204_217"
-    >
-      <stop stop-color="#97E6FF"></stop>
-      <stop stop-opacity="0" stop-color="white" offset="1"></stop>
-    </linearGradient>
-  </defs>
-</svg>
-  <div class="vertical-line line-left"></div>
-  <div class="vertical-line line-right"></div>
-
-  <h2 class="about" style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; color: white;">About Me</h2>
-  <center>
-    <h1 class="about-body" style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; color:white;">Hi, I’m Aniruddh Uniyal — a tech enthusiast passionate about building, breaking, and understanding software. I thrive at the intersection of technology, ethical hacking, and problem-solving, always eager to dive deep into code and uncover how things work under the hood.<br><br>My journey started with a curiosity for how software shapes the world. Today, I spend my time coding solutions, exploring cybersecurity concepts, and sharpening my skills through platforms like LeetCode, where solving complex problems fuels both my logic and creativity.<br><br>Whether it's developing robust applications, digging into the ethical side of hacking, or tackling algorithmic challenges.<br></h1>
-  </center>
-
-<div class="container noselect">
-  <div class="canvas">
-    <div class="tracker tr-1"></div>
-    <div class="tracker tr-2"></div>
-    <div class="tracker tr-3"></div>
-    <div class="tracker tr-4"></div>
-    <div class="tracker tr-5"></div>
-    <div class="tracker tr-6"></div>
-    <div class="tracker tr-7"></div>
-    <div class="tracker tr-8"></div>
-    <div class="tracker tr-9"></div>
-    <div id="card">
-      <div class="card-content">
-        <div class="card-glare"></div>
-        <div class="cyber-lines">
-          <span></span><span></span><span></span><span></span>
+    <div class="about-right reveal" style="transition-delay:0.25s">
+      <div class="about-text">
+        <p>I'm passionate about the intersection of security, intelligence, and connectivity — building systems that are not just functional, but resilient and trustworthy.</p>
+        <p>My work spans cybersecurity, AI & data science, and networking. I care deeply about understanding how systems fail so I can make them harder to break.</p>
+        <p>Currently open to new opportunities and interesting problems worth solving.</p>
+      </div>
+      <div class="about-stats">
+        <div>
+          <span class="stat-value">5<span>+</span></span>
+          <span class="stat-label">Years of experience</span>
         </div>
-        <p id="prompt">ID CARD</p>
-        <div class="title">CYBER<br />CARD</div>
-        <div class="glowing-elements">
-          <div class="glow-1"></div>
-          <div class="glow-2"></div>
-          <div class="glow-3"></div>
+        <div>
+          <span class="stat-value">30<span>+</span></span>
+          <span class="stat-label">Projects shipped</span>
         </div>
-        <div class="subtitle">
-          <span>ANIRUDDH</span>
-          <span class="highlight">UNIYAL</span>
+        <div>
+          <span class="stat-value">∞</span>
+          <span class="stat-label">Lines of code</span>
         </div>
-        <div class="card-particles">
-          <span></span><span></span><span></span> <span></span><span></span
-          ><span></span>
+        <div>
+          <span class="stat-value">01</span>
+          <span class="stat-label">Focus — quality</span>
         </div>
-        <div class="corner-elements">
-          <span></span><span></span><span></span><span></span>
-        </div>
-        <div class="scan-line"></div>
       </div>
     </div>
+  </section>
+
+  <!-- WORK -->
+  <section id="work">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-label">/ 02 &nbsp; Selected Work</p>
+        <h2 class="section-title">Projects</h2>
+      </div>
+      <span class="section-count">03 featured</span>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- Big featured card — Cybersecurity -->
+      <div class="project-card wide reveal">
+        <img src="Cybersecurity.jpg" alt="Cybersecurity" loading="lazy" />
+        <div class="project-card-overlay"></div>
+        <span class="project-card-arrow">↗</span>
+        <div class="project-card-content">
+          <p class="project-card-num">01 / Cybersecurity</p>
+          <h3 class="project-card-title">Threat Detection & Penetration Testing</h3>
+          <div class="project-card-tags">
+            <span class="tag">Kali Linux</span><span class="tag">Wireshark</span>
+            <span class="tag">Metasploit</span><span class="tag">OSINT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 — AI & Data Science -->
+      <div class="project-card reveal" style="transition-delay:0.1s">
+        <img src="AI.jpg" alt="AI & Data Science" loading="lazy" />
+        <div class="project-card-overlay"></div>
+        <span class="project-card-arrow">↗</span>
+        <div class="project-card-content">
+          <p class="project-card-num">02 / AI & Data Science</p>
+          <h3 class="project-card-title">ML Models & Data Pipelines</h3>
+          <div class="project-card-tags">
+            <span class="tag">Python</span><span class="tag">PyTorch</span><span class="tag">Pandas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 — Networking -->
+      <div class="project-card reveal" style="transition-delay:0.2s">
+        <img src="Network.jpg" alt="Networking CCNA" loading="lazy" />
+        <div class="project-card-overlay"></div>
+        <span class="project-card-arrow">↗</span>
+        <div class="project-card-content">
+          <p class="project-card-num">03 / Networking</p>
+          <h3 class="project-card-title">CCNA — Network Architecture</h3>
+          <div class="project-card-tags">
+            <span class="tag">Cisco</span><span class="tag">CCNA</span><span class="tag">TCP/IP</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3D TERMINAL -->
+  <div id="terminal-section">
+    <p class="terminal-hint">/ Interactive Terminal — drag to rotate</p>
+
+    <div class="terminal-scene" id="termScene">
+      <div class="terminal-box" id="termBox">
+
+        <!-- Title bar -->
+        <div class="terminal-titlebar">
+          <div class="t-dot red"></div>
+          <div class="t-dot yellow"></div>
+          <div class="t-dot green"></div>
+          <span class="terminal-title">aniruddh@portfolio ~ zsh</span>
+        </div>
+
+        <!-- Body -->
+        <div class="terminal-body" id="termBody">
+          <div class="t-line"><span class="t-out-dim">Last login: Fri Feb 20 10:42:11 on ttys003</span></div>
+          <div class="t-line">&nbsp;</div>
+          <div class="t-line"><span class="t-out-green">✓</span> <span class="t-out-dim">Welcome to Aniruddh's portfolio terminal.</span></div>
+          <div class="t-line"><span class="t-out-dim">  Type</span> <span class="t-out-gold">github</span> <span class="t-out-dim">to visit my profile, or</span> <span class="t-out-gold">help</span> <span class="t-out-dim">for all commands.</span></div>
+          <div class="t-line">&nbsp;</div>
+
+          <!-- Output log -->
+          <div id="termOutput"></div>
+
+          <!-- Live input row -->
+          <div class="t-input-row" id="termInputRow">
+            <span class="t-prompt">❯</span>
+            <span class="t-path">~/portfolio</span>
+            <span class="t-branch"> (main)</span>
+            <input
+              class="t-real-input"
+              id="termInput"
+              type="text"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              placeholder=""
+            />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="terminal-footer-hint">Try typing <span>github</span> · <span>skills</span> · <span>help</span></p>
   </div>
-</div>
 
-<!--Translations of about me-->
-<!-- English -->
-<div class="lang-block en">
-  <h2>About Me</h2>
-  <p>Hi, I’m Aniruddh Uniyal — a tech enthusiast passionate about building, breaking, and understanding software. I thrive at the intersection of technology, ethical hacking, and problem-solving, always eager to dive deep into code and uncover how things work under the hood.</p>
-  <p>My journey started with a curiosity for how software shapes the world. Today, I spend my time coding solutions, exploring cybersecurity concepts, and sharpening my skills through platforms like LeetCode, where solving complex problems fuels both my logic and creativity.</p>
-  <p>Whether it's developing robust applications, digging into the ethical side of hacking, or tackling algorithmic challenges.</p>
-</div>
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="skills-bg-img" id="skillsBg"></div>
+    <div class="skills-inner">
+      <div class="section-header reveal">
+        <div>
+          <p class="section-label">/ 03 &nbsp; Expertise</p>
+          <h2 class="section-title">Skills</h2>
+        </div>
+      </div>
+      <div class="skills-grid">
+        <div class="reveal">
+          <p class="skill-group-title">Cybersecurity</p>
+          <ul class="skill-list">
+            <li>Threat Analysis & Detection</li>
+            <li>Penetration Testing</li>
+            <li>Network Security</li>
+            <li>Cryptography</li>
+            <li>Incident Response</li>
+          </ul>
+        </div>
+        <div class="reveal" style="transition-delay:0.15s">
+          <p class="skill-group-title">AI & Data Science</p>
+          <ul class="skill-list">
+            <li>Machine Learning</li>
+            <li>Deep Learning / Neural Nets</li>
+            <li>Data Analysis & Visualization</li>
+            <li>Python / Pandas / NumPy</li>
+            <li>Model Training & Deployment</li>
+          </ul>
+        </div>
+        <div class="reveal" style="transition-delay:0.3s">
+          <p class="skill-group-title">Networking</p>
+          <ul class="skill-list">
+            <li>TCP/IP & Protocols</li>
+            <li>Network Architecture</li>
+            <li>Firewalls & VPNs</li>
+            <li>Packet Analysis</li>
+            <li>Cloud Networking</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Spanish -->
-<div class="lang-block es">
-  <h2>Sobre mí</h2>
-  <p>Hola, soy Aniruddh Uniyal, un entusiasta de la tecnología apasionado por construir, romper y comprender el software. Me desenvuelvo en la intersección de la tecnología, la piratería ética y la resolución de problemas, siempre con ganas de profundizar en el código y descubrir cómo funcionan las cosas internamente.</p>
-  <p>Mi viaje comenzó con una curiosidad por cómo el software da forma al mundo. Hoy paso mi tiempo codificando soluciones, explorando conceptos de ciberseguridad y perfeccionando mis habilidades en plataformas como LeetCode, donde resolver problemas complejos alimenta tanto mi lógica como mi creatividad.</p>
-  <p>Ya sea desarrollando aplicaciones sólidas, profundizando en el lado ético de la piratería o abordando desafíos algorítmicos.</p>
-</div>
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="contact-bg-text" id="contactBg">Hello.</div>
+    <p class="contact-label reveal">/ 04 &nbsp; Get In Touch</p>
+    <h2 class="contact-heading reveal" style="transition-delay:0.1s">
+      Let's build<br>something <em>great</em>.
+    </h2>
+    <p class="contact-sub reveal" style="transition-delay:0.2s">
+      Open to full-time roles, freelance projects,<br>and conversations worth having.
+    </p>
+    <div class="social-links reveal" style="transition-delay:0.4s">
+      <a href="https://github.com/Gogeta654" target="_blank">GitHub ↗</a>
+    </div>
+  </section>
 
-<!-- French -->
-<div class="lang-block fr">
-  <h2>À propos de moi</h2>
-  <p>Bonjour, je suis Aniruddh Uniyal — un passionné de technologie intéressé par la création, la déconstruction et la compréhension des logiciels. Je prospère à l'intersection de la technologie, du hacking éthique et de la résolution de problèmes, toujours prêt à plonger dans le code pour comprendre comment les choses fonctionnent en profondeur.</p>
-  <p>Mon parcours a commencé par une curiosité sur la façon dont les logiciels façonnent le monde. Aujourd'hui, je passe mon temps à coder des solutions, explorer des concepts de cybersécurité et affûter mes compétences via des plateformes comme LeetCode, où la résolution de problèmes complexes nourrit ma logique et ma créativité.</p>
-  <p>Qu'il s'agisse de développer des applications robustes, d'explorer le côté éthique du hacking ou de relever des défis algorithmiques.</p>
-</div>
+  <footer>
+    <span class="footer-name">Aniruddh Uniyal</span>
+    <span class="footer-copy">© 2025 — All rights reserved</span>
+  </footer>
 
-<!-- Japanese -->
-<div class="lang-block jp">
-  <h2>私について</h2>
-  <p>こんにちは、アニルッド・ウニヤルです。ソフトウェアを構築し、壊し、理解することに情熱を注ぐ技術愛好家です。私は、テクノロジー、倫理的ハッキング、問題解決の交差点で活躍しており、コードに深く入り込み、その仕組みを明らかにすることに常に意欲的です。</p>
-  <p>私の旅は、ソフトウェアが世界をどのように形作っているのかという好奇心から始まりました。現在は、ソリューションのコーディング、サイバーセキュリティの概念の探求、LeetCodeなどのプラットフォームでスキルを磨いています。複雑な問題を解くことが、私の論理力と創造力を刺激しています。</p>
-  <p>堅牢なアプリケーションの開発、ハッキングの倫理的側面の探求、アルゴリズムの課題への取り組みなど、さまざまなことに取り組んでいます。</p>
-</div>
+  <script>
+    // ── Custom cursor ──
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
 
-<!-- Chinese -->
-<div class="lang-block ch">
-  <h2>关于我</h2>
-  <p>你好，我是 Aniruddh Uniyal，一位热衷于构建、破解和理解软件的技术爱好者。我专注于技术、道德黑客和解决问题的交汇点，始终渴望深入研究代码，揭示底层的工作原理。</p>
-  <p>我的旅程始于对软件如何塑造世界的好奇心。如今，我花时间编写解决方案、探索网络安全概念，并通过 LeetCode 等平台提升技能，解决复杂问题同时激发我的逻辑和创造力。</p>
-  <p>无论是开发强大的应用程序、挖掘道德黑客的方面，还是应对算法挑战。</p>
-</div>
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
 
-<!-- Korean -->
-<div class="lang-block kr">
-  <h2>소개</h2>
-  <p>안녕하세요, 저는 Aniruddh Uniyal입니다. 소프트웨어를 만들고, 분석하고, 이해하는 데 열정을 가진 기술 애호가입니다. 기술, 윤리적 해킹, 문제 해결이 만나는 지점에서 활약하며, 코드 속으로 깊이 파고들어 그 작동 원리를 파악하는 것을 즐깁니다.</p>
-  <p>소프트웨어가 세상을 어떻게 형성하는지에 대한 호기심으로 여정을 시작했습니다. 현재는 솔루션을 코딩하고, 사이버 보안 개념을 탐구하며, LeetCode와 같은 플랫폼을 통해 기술을 연마하고 있습니다. 복잡한 문제를 해결하는 과정에서 논리력과 창의력이 자극받습니다.</p>
-  <p>강력한 애플리케이션 개발, 윤리적 해킹의 측면 탐색, 알고리즘 문제 해결 등 다양한 분야에서 활동하고 있습니다.</p>
-</div>
+    document.querySelectorAll('a, .project-card').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('expanded'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('expanded'));
+    });
 
-<!-- Tamil -->
-<div class="lang-block tm">
-  <h2>என்னை பற்றி</h2>
-  <p>வணக்கம், நான் அனிருத் யுனியல் — மென்பொருளை உருவாக்க, பகுக்க மற்றும் புரிந்துகொள்ள ஆவலுடன் இருக்கும் தொழில்நுட்ப ஆர்வலன். தொழில்நுட்பம், நெறிமுறை ஹேக்கிங் மற்றும் சிக்கல் தீர்வுகளின் சந்திப்பில் நான் சிறந்து விளங்குகிறேன். கோடை ஆழமாக ஆராய்ந்து, விஷயங்கள் எப்படி செயல்படுகின்றன என்பதை கண்டறிய எப்போதும் தயாராக இருக்கிறேன்.</p>
-  <p>மென்பொருள் உலகை எவ்வாறு வடிவமைக்கிறது என்பதைப் பற்றிய ஆவலுடன் என் பயணம் தொடங்கியது. இன்று, தீர்வுகளை குறியிடுவதிலும், kyber பாதுகாப்பு கருத்துகளை ஆராய்வதிலும், LeetCode போன்ற தளங்களில் என் திறன்களை கூர்மையாக்குவதிலும் என் நேரத்தை செலவழிக்கிறேன். சிக்கலான சிக்கல்களை தீர்ப்பது என் தர்க்கம் மற்றும் படைப்பாற்றலை ஊக்குவிக்கிறது.</p>
-  <p>அதிக பலமுடைய பயன்பாடுகளை உருவாக்குவதோ, ஹேக்கிங்கின் நெறிமுறை அம்சங்களை ஆராய்வதோ அல்லது அளவுரு சவால்களை எதிர்கொள்வதோ இருக்கலாம்.</p>
-</div>
+    (function animateRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animateRing);
+    })();
 
-<!-- Hindi -->
-<div class="lang-block hn">
-  <h2>मेरे बारे में</h2>
-  <p>नमस्ते, मैं अनिरुद्ध उनियाल हूं — एक तकनीकी उत्साही जो सॉफ्टवेयर को बनाना, तोड़ना और समझना पसंद करता है। मैं तकनीक, नैतिक हैकिंग और समस्या-समाधान के संगम पर काम करता हूं, और कोड की गहराई में जाकर यह समझने को लेकर हमेशा उत्साहित रहता हूं कि चीजें कैसे काम करती हैं।</p>
-  <p>मेरी यात्रा उस जिज्ञासा से शुरू हुई कि सॉफ्टवेयर दुनिया को कैसे आकार देता है। आज मैं समाधान कोड करता हूं, साइबर सुरक्षा अवधारणाओं की खोज करता हूं और LeetCode जैसे प्लेटफ़ॉर्म पर अपनी कौशल को निखारता हूं, जहां जटिल समस्याओं को हल करना मेरी तर्क शक्ति और रचनात्मकता को प्रेरित करता है।</p>
-  <p>चाहे वह मजबूत अनुप्रयोगों का विकास हो, हैकिंग के नैतिक पक्ष की खोज हो या एल्गोरिदमिक चुनौतियों से निपटना हो।</p>
-</div>
+    // ── Scroll parallax ──
+    const heroBg    = document.getElementById('heroBg');
+    const gridLines = document.getElementById('gridLines');
+    const skillsBg  = document.getElementById('skillsBg');
+    const contactBg = document.getElementById('contactBg');
+    const skillsEl  = document.getElementById('skills');
+    const contactEl = document.getElementById('contact');
 
-<script>
-  const lang = localStorage.getItem('language') || 'en';
-  document.documentElement.setAttribute('lang', lang);
-</script>
+    function onScroll() {
+      const sy = window.scrollY;
+      heroBg.style.transform    = `translateY(${sy * 0.38}px)`;
+      gridLines.style.transform = `translateY(${sy * 0.15}px)`;
+      const sRel = sy - skillsEl.offsetTop;
+      skillsBg.style.transform = `translateY(${sRel * 0.1}px)`;
+      const cRel = sy - contactEl.offsetTop;
+      contactBg.style.transform = `translate(-50%, calc(-50% + ${cRel * 0.1}px))`;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // ── Mouse parallax on hero ──
+    document.addEventListener('mousemove', e => {
+      if (window.scrollY > window.innerHeight * 0.6) return;
+      const xP = (e.clientX / window.innerWidth  - 0.5);
+      const yP = (e.clientY / window.innerHeight - 0.5);
+      heroBg.style.transform    = `translate(${xP * -28}px, ${yP * -16}px) translateY(${window.scrollY * 0.38}px)`;
+      gridLines.style.transform = `translate(${xP * -12}px, ${yP * -8}px)`;
+    });
+
+    // ── Reveal on scroll ──
+    const reveals  = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // ══════════════════════════════════════════
+    // ── 3D Terminal ──
+    // ══════════════════════════════════════════
+    const scene      = document.getElementById('termScene');
+    const box        = document.getElementById('termBox');
+    const termInput  = document.getElementById('termInput');
+    const termOutput = document.getElementById('termOutput');
+    const termBody   = document.getElementById('termBody');
+
+    let rotX = 8, rotY = -14;
+    let dragging = false, lastX = 0, lastY = 0;
+    let velX = 0, velY = 0;
+    let animFrame;
+
+    // Idle gentle sway when not dragging
+    let idleT = 0;
+    let isIdling = true;
+    function idleSway() {
+      if (isIdling) {
+        idleT += 0.008;
+        const swayX = rotX + Math.sin(idleT * 0.7) * 1.5;
+        const swayY = rotY + Math.sin(idleT) * 2.5;
+        box.style.transform = `rotateX(${swayX}deg) rotateY(${swayY}deg)`;
+      }
+      requestAnimationFrame(idleSway);
+    }
+    idleSway();
+
+    // Mouse drag
+    scene.addEventListener('mousedown', e => {
+      if (e.target === termInput) return;
+      dragging = true; isIdling = false;
+      lastX = e.clientX; lastY = e.clientY;
+      velX = 0; velY = 0;
+      cancelAnimationFrame(animFrame);
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      velX = dy * 0.35; velY = dx * 0.35;
+      rotX = Math.max(-32, Math.min(32, rotX + velX));
+      rotY = Math.max(-48, Math.min(48, rotY + velY));
+      box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      lastX = e.clientX; lastY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      function inertia() {
+        velX *= 0.91; velY *= 0.91;
+        rotX = Math.max(-32, Math.min(32, rotX + velX));
+        rotY = Math.max(-48, Math.min(48, rotY + velY));
+        box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        if (Math.abs(velX) > 0.04 || Math.abs(velY) > 0.04) {
+          animFrame = requestAnimationFrame(inertia);
+        } else {
+          isIdling = true;
+        }
+      }
+      inertia();
+    });
+
+    // Touch drag
+    scene.addEventListener('touchstart', e => {
+      if (e.target === termInput) return;
+      lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+      dragging = true; isIdling = false;
+    }, { passive: true });
+    scene.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      const dx = e.touches[0].clientX - lastX;
+      const dy = e.touches[0].clientY - lastY;
+      rotX = Math.max(-32, Math.min(32, rotX + dy * 0.35));
+      rotY = Math.max(-48, Math.min(48, rotY + dx * 0.35));
+      box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+    }, { passive: true });
+    scene.addEventListener('touchend', () => { dragging = false; isIdling = true; });
+
+    // Click terminal body to focus input
+    termBody.addEventListener('click', () => termInput.focus());
+
+    // ── Commands ──
+    const GITHUB_URL = 'https://github.com/Gogeta654';
+
+    const commands = {
+      github: () => {
+        appendLines([
+          { text: '→ Launching GitHub...', cls: 't-out-green' },
+          { text: '  ↗ github.com/aniruddhuniyal', cls: 't-out-link', link: GITHUB_URL },
+        ]);
+        setTimeout(() => window.open(GITHUB_URL, '_blank'), 600);
+      },
+      help: () => appendLines([
+        { text: 'COMMANDS', cls: 't-out-gold' },
+        { text: '  github  → open GitHub profile', cls: 't-out-dim' },
+        { text: '  skills  → areas of expertise', cls: 't-out-dim' },
+        { text: '  clear   → clear terminal', cls: 't-out-dim' },
+      ]),
+      skills: () => appendLines([
+        { text: 'EXPERTISE', cls: 't-out-gold' },
+        { text: '  Cybersecurity', cls: 't-out-dim' },
+        { text: '  AI & Data Science', cls: 't-out-dim' },
+        { text: '  Networking', cls: 't-out-dim' },
+      ]),
+      clear: () => { termOutput.innerHTML = ''; },
+    };
+
+    function appendLines(lines) {
+      const blank = document.createElement('div');
+      blank.className = 't-line';
+      blank.innerHTML = '&nbsp;';
+      termOutput.appendChild(blank);
+      lines.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 't-line';
+        if (l.link) {
+          const a = document.createElement('a');
+          a.href = l.link; a.target = '_blank';
+          a.className = 't-out-link';
+          a.style.cursor = 'pointer';
+          a.textContent = l.text;
+          div.appendChild(a);
+        } else {
+          const span = document.createElement('span');
+          span.className = l.cls;
+          span.textContent = l.text;
+          div.appendChild(span);
+        }
+        termOutput.appendChild(div);
+      });
+      const blank2 = document.createElement('div');
+      blank2.className = 't-line'; blank2.innerHTML = '&nbsp;';
+      termOutput.appendChild(blank2);
+      termBody.scrollTop = termBody.scrollHeight;
+    }
+
+    function echoCmd(cmd) {
+      const div = document.createElement('div');
+      div.className = 't-line';
+      div.innerHTML = `<span class="t-prompt">❯</span> <span class="t-path">~/portfolio</span><span class="t-branch"> (main)</span> <span class="t-cmd"> ${cmd}</span>`;
+      termOutput.appendChild(div);
+    }
+
+    termInput.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const raw = termInput.value.trim().toLowerCase();
+      termInput.value = '';
+      if (!raw) return;
+      echoCmd(raw);
+      if (commands[raw]) {
+        commands[raw]();
+      } else {
+        appendLines([
+          { text: `zsh: command not found: ${raw}`, cls: 't-error' },
+          { text: "  Type 'help' to see available commands.", cls: 't-out-dim' },
+        ]);
+      }
+      termBody.scrollTop = termBody.scrollHeight;
+    });
+  </script>
 </body>
 </html>
